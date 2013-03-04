@@ -1,0 +1,38 @@
+source $ADMIN_SCRIPTS/master.vimrc
+source /home/engshare/admin/scripts/vim/biggrep.vim
+syn on
+
+set tabstop=2 softtabstop=2 shiftwidth=2 number ic nowrap
+autocmd FileType * set formatoptions-=c formatoptions-=r formatoptions-=o
+if has("mouse")
+  set mouse=a
+endif
+set listchars=eol:$,tab:>-,trail:~,extends:>,precedes:<
+set cursorline
+set textwidth=80
+set colorcolumn=+1
+hi ColorColumn ctermbg=2
+" set clipboard=unnamedplus
+" set list
+
+map <C-h> <C-w>h
+map <C-l> <C-w>l
+map <C-e>  :! %:p:r 
+map <C-b> :w<CR>:!~/dev/tools/genm.sh %<CR>:make -f .makefile %:r<CR>
+map <C-j> :e %:r.h<CR>
+map <C-k> :e %:r.cpp<CR>
+map <C-\> :tab split<CR>:exec("tag ".expand("<cword>"))<CR>
+map <C-p> :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
+
+set viminfo='80,\"100,:20,%,n~/.viminfo
+function! ResCur()
+  if line("'\"") <= line("$")
+    normal! g`"
+    return 1
+  endif
+endfunction
+
+augroup resCur
+  autocmd!
+  autocmd BufWinEnter * call ResCur()
+augroup END
