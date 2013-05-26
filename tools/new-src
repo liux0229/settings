@@ -1,0 +1,3 @@
+#! /bin/bash
+
+cp ~/dev/templates/T.cpp $1

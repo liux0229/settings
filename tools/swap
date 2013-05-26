@@ -1,0 +1,11 @@
+#! /bin/sh
+# Usage : swap <file1> <file2>
+
+if [ "$#" != 2 ]; then
+	echo "Usage : swap <file1> <file2>"
+	exit 1
+fi
+
+mv $1 __file1_tmp
+mv $2 $1 
+mv __file1_tmp $2 

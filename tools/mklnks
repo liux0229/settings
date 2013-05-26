@@ -1,0 +1,134 @@
+#! /bin/sh
+Prog=mklnks
+Usage="$Prog [project_dir]"
+# Create symbolic links to the files(dirs) found in .cvsignore, which resides 
+# 	in the dir `project_dir'. The real files can be found in "`project_dir'_rcs".
+# If project_dir is NOT given on the command line, $Prog tries to read project.config,
+# 	and reports error on failure.
+# $Prog is designed to complement with CVS, when you don't want to put everything into
+# 	CVS repository but something is needed by the project. The needed files are kept
+# 	only once in "`project_dir'_rcs"(this should be the source file dir to import a project
+# 	into CVS)
+# The project can have sub-dirs, if they are NOT ignored by CVS, $Prog does
+# 	the same thing above on them, except that the project_dir is NOT read again and
+# 	the needed files are under "`project_dir'_rcs"/sub-dir
+# If NOT providing project_dir, You don't have to be in the root of project_dir to 
+# 	issue this command, $Prof will check the parents of your working-dir until 
+# 	reaching `/' or project.config is found.
+
+config_file=project.config
+rc_suffix="_rcs"
+log_file=/tmp/$Prog.log
+
+ReadConfig() {
+	# $1 = config file
+	project_dir=`grep -v "#" $1 | grep "project_dir=" | sed "s/ //g" | cut -d'=' -f2`
+	if [ -z "$project_dir" ]; then
+		echo "$Prog : Bad format of $1"
+		exit 1
+	fi
+}
+
+declare inode # Return Value
+GetInode() {
+	# $1 = dir
+	inode=`ls -id $1 | sed "s/ *//" | cut -d' ' -f1`
+}
+
+if [ $# = 1 ]; then
+	project_dir=$1
+else
+	# Find project.config in wd and all its parents
+	# Determine the end of search by getting inode of `/'
+	# 	This involes some problem when wd is on a different
+	#	partition from `/'. So still getting up n_try times 
+	#	after first reaching inode of `/' to
+	#	ensure really reaching `/'
+	# This implemetation can be better replaced by using pwd
+	n_try=3
+	GetInode "/"	
+	root_inode=$inode
+	while [ ! -f $config_file ]; do
+		cd ..
+		GetInode "."
+		if [ $inode = $root_inode ]; then
+			if [ $n_try = 0 ]; then
+				break
+			fi
+			n_try=`expr $n_try - 1`
+		fi
+	done
+	if [ ! -f $config_file ]; then
+		echo "$Prog: Can't find $config_file"
+		exit 1
+	fi
+	path=`pwd`
+	echo "Using $path/$config_file"
+	ReadConfig $path/$config_file
+	echo "Project dir is $project_dir"
+fi
+
+declare -a ignore_list=('^CVS$' '^RCS$' '^SCCS$' '^CVS$' '^CVS\\.adm$' '^RCSLOG$' '\\.bak$' '\\.BAK$')
+IsIgnored() {
+	# Return 0 on True, non-0 on False
+	# $1 = dir name
+	# list elems are all reg-exps
+	n=${#ignore_list[*]}
+	i=0
+	while [ $i -lt $n ]; do
+		if echo $1 | grep -q ${ignore_list[$i]} ; then
+			# Found in the list
+			return 0
+		fi
+		i=`expr $i + 1`
+	done
+	return 1
+}
+
+MkLnks() {
+	# $1 = sub-dir name, `.' for the root dir
+	# Traverse all sub-dirs, call MkLnks on them
+	echo Make Lnks for $1/\*
+	local dir
+	ls -A $1 |
+	while read dir; do
+		# If $dir is a symbolic link, $Prog possibly has been run on
+		# 	the project, so just ignore it
+		if [ -d "$1/$dir" -a ! -L "$1/$dir" ]; then
+			if ! IsIgnored $dir; then
+				MkLnks $1/$dir
+			fi
+		fi
+	done
+	# Now make link
+	if [ -f $1/.cvsignore ]; then
+		cat $1/.cvsignore |
+		while read ignored_file; do
+			if [ -e $rc_dir/$1/$ignored_file ]; then
+				if [ -L $project_dir/$1/$ignored_file ]; then
+					echo "$Prog: $FUNCNAME: Symbolic link $project_dir/$1/$ignored_file already exists" >> $log_file
+				else
+					ln -s $rc_dir/$1/$ignored_file $project_dir/$1/$ignored_file
+				fi
+			else
+				echo "$Prog: $FUNCNAME: Can't find $rc_dir/$1/$ignored_file" >> $log_file
+			fi
+		done
+	fi
+}
+
+rc_dir=$project_dir$rc_suffix
+# Now should reside in $project_dir
+# Clean up Error Log file
+rm -f $log_file; touch $log_file
+MkLnks "."
+echo "Done. For ignored_files which can't be found check $log_file"
+
+
+
+
+
+
+
+
+

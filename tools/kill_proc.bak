@@ -1,0 +1,13 @@
+#! /bin/sh -x
+Usage="$0 <proc_name>"
+
+if [ $# != 1 ]; then
+	echo $Usage
+	exit 1
+fi
+
+proc_name=$1
+pid=`ps -C $proc_name`
+if [ ! -z $pid ]; then
+	kill -9 $pid
+fi

@@ -1,0 +1,17 @@
+#! /bin/sh
+Usage="smb machine [dir]"
+# Mount //machine/dir to /mnt/remote
+# If dir is NOT specified, print out res on machine
+
+if [ "$#" -lt 1 ]; then
+	echo Usage: $Usage 
+	exit 1
+fi
+
+machine=$1
+dir=$2
+if [ -z $dir ]; then
+	smbclient -N -L //$machine
+else
+	mount.smbfs //$machine/$dir /mnt/remote -o guest
+fi

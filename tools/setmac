@@ -1,0 +1,18 @@
+#! /bin/sh
+# Usage : setmac [line_no]
+# line_no specifies which line to use in mac file
+# If it is omitted, 1 is used
+# If line_no is set to 0, use default mac addr
+
+if [ "$#" = 1 ]; then
+	if [ $1 = 0 ]; then
+		mac="00:A1:B0:A0:34:28"
+	else
+		mac=`getline /home/liux/mac $1`
+	fi
+else
+	mac=`getline /home/liux/mac 1`
+fi
+
+ifconfig eth0 down
+ifconfig eth0 hw ether $mac

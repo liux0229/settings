@@ -1,0 +1,11 @@
+#! /bin/sh
+
+ifdown eth0
+ifup eth0
+if lsmod | grep -q "drcom"; then
+	rmmod drcom
+fi
+modprobe drcom
+kill_proc drcomcd
+drcomcd
+drcomc login

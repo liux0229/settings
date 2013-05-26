@@ -1,0 +1,21 @@
+#! /bin/sh
+# Usage : $0 <htmlfile> <name> <value>
+# Change a certain field in the form of <htmlfile> to a certain value
+# eg. <input ... name = "somewhat" value = "fill this one">
+# There can be abtrary space around "="
+# The name && value must be double-quoted
+# The html file is updated
+# No name_NOT_found notifying
+# Store the orignal file named <htmlfile>__bak into backup_dir
+
+if [ "$#" != 3 ]; then
+	echo "Usage : $0 <htmlfile> <name> <value>"	
+	exit 1
+fi
+
+htmlfile=$1
+name=$2
+value=$3
+mv -f $htmlfile $htmlfile"__bak"
+sed "s/\(name[ \t]*=[ \t]*\"$name\"[ \t]*value[ \t]*=[ \t]*\"\).*\"/\1$value\"/" $htmlfile"__bak" > $htmlfile
+mv -f $htmlfile"__bak" /home/liux/tools/backup_dir/

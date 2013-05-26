@@ -1,0 +1,9 @@
+#! /bin/sh
+
+# Erase all the lines in [a-z] with the respective single letter
+
+for L in [a-z] 
+do
+	mv -f $L tmp
+	grep -v ^"$L"$ tmp > $L
+done

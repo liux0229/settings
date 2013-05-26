@@ -1,0 +1,5 @@
+#! /bin/sh
+cat << End > .makefile
+$1 : $1.cpp
+	g++ -Wall -g -o $1 $1.cpp
+End

@@ -1,0 +1,29 @@
+#! /bin/sh
+#Usage : $0 <mem-limit> <prog>
+# mem-limit is in KB, set to 0 means unlimited
+# wd is searched for locating prog  
+# Pipeline Usage is broken at present
+
+if [ "$#" -lt 2 ]; then
+	echo "Usage : $0 <mem-limit> <prog> [options-for-prog]"
+	exit 1
+fi
+mem_limit=$1
+if [ $mem_limit = 0 ]; then
+	mem_limit=unlimited
+fi
+prog=$2
+# Get options
+shift; shift
+while [ "$#" != 0 ]
+do
+	options="$options $1"
+	shift
+done
+old_path=$PATH
+PATH=$PATH":."
+ulimit -v $mem_limit 
+# Run the prog
+$prog $options
+ulimit -v unlimited
+PATH=$old_path

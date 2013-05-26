@@ -1,0 +1,12 @@
+#! /bin/sh
+Usage="$0 <seconds> <prog>"
+
+if [ $# != 2 ]; then
+	echo $Usage
+	exit 1
+fi
+
+n_sec=$1
+prog=$2
+sleep $n_sec
+kill_proc $prog

@@ -1,0 +1,28 @@
+#! /bin/sh
+suf="`echo $1 | awk -F. '{print $NF}'`"
+pre=`echo $1 | awk -F. '{ for(i=1;i<NF;i++) { if ( i > 1 ) printf "."; printf "%s", $i; } print "" }'`
+rm -f .makefile
+if [ $suf = "c" ]; then
+cat << End > .makefile
+$pre : $pre.c
+	gcc -Wall -g -o $pre $pre.c
+End
+elif [ $suf = "cpp" ]; then
+cat << End > .makefile
+$pre : $pre.cpp
+	g++ -Wall -g -o $pre $pre.cpp
+End
+elif [ $suf = "cxx" ]; then
+cat << End > .makefile
+$pre : $pre.cxx
+	/opt/local/bin/g++-mp-4.6 -std=c++0x -Wall -g -o $pre $pre.cxx
+End
+elif [ $suf = "java" ]; then
+cat << End > .makefile
+$pre : $pre.java
+	javac $pre.java
+End
+else
+echo "Not supported type"
+exit 1
+fi

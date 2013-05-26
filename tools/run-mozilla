@@ -1,0 +1,4 @@
+#! /bin/sh
+
+cd /usr/lib/mozilla-1.2.1/
+./run-mozilla.sh

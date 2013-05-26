@@ -1,0 +1,5 @@
+#! /bin/sh
+
+setmac 1
+#ifup eth0_rx | grep -q "done" || echo "Error Occured"
+ifup eth0_zju

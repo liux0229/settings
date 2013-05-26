@@ -1,0 +1,21 @@
+#! /bin/sh
+
+if [ "$#" -eq 0 ]; then
+	echo "Usage : umnt <type>"
+	exit 1
+fi
+if [ $1 != all ]; then
+	if [ $1 = cd ]; then
+		dest=cdrom
+	elif [ $1 = cd1 ]; then
+		dest=cdrom1
+	else
+		dest=$1
+	fi
+	umount /mnt/$dest
+else
+	for par in boot win98 software game media doc misc
+	do
+		umount /mnt/$par 2> /dev/null
+	done
+fi

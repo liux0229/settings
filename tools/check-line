@@ -1,0 +1,14 @@
+#! /bin/sh
+
+# Check if [a-z] && [a-z]$suffix have the same number of lines
+# Usage : check-line <suffix>
+
+for L in [a-z]
+do
+	if [ `wc -l $L   | sed "s/^ *//" | cut -d" " -f1` != \
+	     `wc -l $L$1 | sed "s/^ *//" | cut -d" " -f1` ]
+	then
+		echo "Find Error when proceeding $L"
+		exit 1
+	fi
+done

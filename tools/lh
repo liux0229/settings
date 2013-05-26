@@ -1,0 +1,11 @@
+#! /bin/sh
+Usage="$0 [dir]"
+# Show all hidden files in dir
+# If dir is NOT given, use wd
+
+if [ $# = 1 ]; then
+	dir=$1
+else
+	dir="."
+fi
+ls -a $dir | grep "^\."

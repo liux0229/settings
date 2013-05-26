@@ -1,0 +1,18 @@
+#! /bin/sh
+# Usage : $0 <dll>
+# Copy dll file from native win98 to the fake win98 drive
+# Auto-Mount the native win98 dir if the NOT mounted
+
+if [ "$#" != 1 ]; then
+	echo "Usage : $0 <dll>"
+fi
+
+dll_file=$1
+if ! echo $dll_file | grep -q "\.dll$"; then
+	dll_file=$dll_file".dll"
+fi
+if [ -z "`ls /mnt/win98 | head -1 `" ]; then
+	mnt win98
+fi
+cd ~/.wine/dosdevices/
+cp /mnt/win98/windows/system/$dll_file c:/windows/system/

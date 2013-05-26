@@ -1,0 +1,18 @@
+#! /bin/sh
+# Play All Video/Audio Files Under WD
+# Presently Only Skip Dirs
+# Usage : playall [options-for-mplayer]
+
+# Get options for mplayer
+while [ "$#" -gt 0 ]
+do
+	options=$options" "$1
+	shift
+done
+wd=`pwd`
+for file in *.*
+do
+	if [ -f $file ]; then
+		mplayer $options $wd/$file > /dev/null
+	fi
+done

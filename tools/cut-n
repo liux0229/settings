@@ -1,0 +1,16 @@
+#! /bin/sh
+
+for L in [s-z]
+do
+	grep "(" $L.txt > $L-disc
+	cp -f $L-disc tmp
+	str1=`wc -l tmp`
+	cp -f $L tmp
+	str2=`wc -l tmp`
+	if [ "$str1" != "$str2" ]
+	then
+		echo "Encounter Error when proceeding $L.txt"
+		break
+	fi
+done
+rm -f tmp

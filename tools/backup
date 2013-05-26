@@ -1,0 +1,28 @@
+#! /bin/sh
+# Usage : backup <file|dir>
+# Disc  : backup file to file_bak1, if file_bak1 exists, mv file_bak1 to 
+#	  file_bak2, and so forth
+# No wild card file name supported at present 
+
+if [ "$#" != 1 ]
+then
+	echo "Usage : $0 <file|dir>"
+	exit 1
+fi
+
+file=$1 
+if [ -d $file ]
+then
+	n=`ls -d "$file"_bak* 2> /dev/null | more | wc -l`
+else
+	n=`ls    "$file"_bak* 2> /dev/null | more | wc -l`
+fi 
+n=`expr $n` # Get rid of blank at front
+while [ "$n" -gt 0 ]
+do
+	n_new=`expr $n + 1`
+	mv "$file"_bak$n "$file"_bak$n_new
+	n=`expr $n - 1`
+done
+cp -R $file "$file"_bak1
+exit 0

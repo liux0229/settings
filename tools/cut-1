@@ -1,0 +1,9 @@
+#! /bin/bash
+
+for file in ? 
+do
+	tail +2 $file > $file.tmp
+	mv -f $file.tmp $file
+	rm -f $file.tmp
+done
+exit 0

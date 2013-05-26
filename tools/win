@@ -1,0 +1,14 @@
+#! /bin/sh
+# Boot to windows
+
+# Backup orig grub.conf
+if [ ! -d /etc/my ]; then
+	mkdir /etc/my
+fi
+cp -f /boot/grub/grub.conf /etc/my/grub.conf
+# Change timeout to 120 secs
+sed "s/timeout=.*/timeout=120/" /etc/my/grub.conf > /boot/grub/grub.conf
+# Set flag
+touch /etc/my/booted_win
+
+reboot

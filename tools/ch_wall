@@ -1,0 +1,53 @@
+#! /bin/sh
+Usage="$0 [-keep] [-test]"
+# -keep : use alien-night.jpg as $keep_prob
+# -test : only output selected wall
+
+# Get Args
+is_keep=0
+is_test=0
+while [ "$#" != 0 ]; do
+	case $1 in
+		-keep) is_keep=1
+		;;
+		-test) is_test=1
+		;;
+	esac
+	shift
+done
+
+wall_dir=/usr/share/wallpapers
+src_dir=$wall_dir/pics
+
+# Pre-build rand number tbl
+n_file=`ls $src_dir | wc -l`
+rands=(`bigrand $n_file`)
+
+i=0
+for file in `ls $src_dir`; do
+	# Choose $file with prob 1 / ($i + 1)
+	rand=${rands[$i]}
+	i=`expr $i + 1`	
+	if [ `expr $rand % $i` = 0 ]; then
+		wall=$file
+	fi
+done
+
+keep_prob=4/5
+if [ $is_keep = 1 ]; then
+	# -keep is given
+	i=`echo $keep_prob | cut -d"/" -f1`
+	n=`echo $keep_prob | cut -d"/" -f2`
+	keep_wall=`ls $src_dir | grep alien`
+	rand=`bigrand`
+	if [ `expr $rand % $n` -lt $i ]; then
+		wall=$keep_wall
+	fi
+fi
+
+if [ $is_test = 1 ]; then
+	echo "$wall is selected"
+else
+	echo "$wall is selected" >> ~/ch_wall.out
+	cp -f $src_dir/$wall $wall_dir/current.jpg
+fi

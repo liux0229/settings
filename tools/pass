@@ -1,0 +1,20 @@
+#! /bin/sh
+# Usage : pass <string>
+# Pass string to /dev/tty1
+# There can be blanks in string
+
+if [ "$#" = 0 ]; then
+	echo "Usage : pass <string>"
+	exit 1
+fi
+# Get string
+while [ "$#" != 0 ]
+do
+	string=$string$1
+	if [ "$#" -gt 1 ]; then
+		string=$string" "
+	fi
+	shift
+done
+
+echo "$string" > /dev/tty1

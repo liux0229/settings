@@ -1,0 +1,33 @@
+#! /bin/sh
+Prog=cleanup
+Usage="$Prog project_dir"
+# Delete all symbolic links in project_dir, then call cvs release -d project_dir
+
+if [ "$#" != 1 ]; then
+	echo Usage: $Usage
+	exit 1
+fi
+project_dir=$1
+
+# Clean up symbolic links
+
+CleanUp() {
+	# $1 = sub-dir, passing project_dir to start
+	local file
+	ls -A $1 |
+	while read file; do
+		if [ -L $1/$file ]; then
+			rm -f $1/$file
+		elif [ -d $1/$file ]; then
+			CleanUp $1/$file
+		fi
+	done
+}
+
+if [ ! -d $project_dir ]; then
+	echo "$Prog: Can't find $project_dir"
+	exit 1
+fi
+CleanUp $project_dir
+
+cvs release -d $project_dir

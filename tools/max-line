@@ -1,0 +1,16 @@
+#! /bin/sh
+
+#Usage : max-line <suffix>
+
+max_line=0
+for file in [a-z]$1
+do
+	max=`wc -L $file | sed "s/^ *//" | cut -d" " -f1`	
+	if [ $max -gt $max_line ]
+	then
+		max_line=$max
+	fi	
+done
+echo $max_line
+
+# suggested_buffer_size = 2200

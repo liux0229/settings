@@ -1,0 +1,15 @@
+#! /bin/sh
+Usage="prog <prog_name>"
+# List the details of prog_name using ls && which
+
+if [ $# != 1 ]; then
+	echo "$Usage"
+	exit 1
+fi
+
+which_output="`which $1 2>&1`"
+if [ "$?" == 0 ]; then
+	ls -l --color=tty `which $1`
+else
+	echo $0 : $which_output	
+fi

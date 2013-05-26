@@ -1,0 +1,13 @@
+#! /bin/sh
+
+base=1
+if [ "$#" = 1 ]; then
+	base=$1
+fi
+
+i=$base
+ls | grep "jpg$" | sort -n |
+while read file; do
+	mv $file $i.jpg
+	i=`expr $i + 1`
+done

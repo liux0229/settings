@@ -1,0 +1,187 @@
+#! /bin/bash
+
+# Get a template c source file
+# Usage temp <type> [new_file_name]
+# If new_file_name is not given, output to stdout 
+# Types are :
+#	f  -  Operate File
+#	(more)
+
+template_dir=~/dev/templates
+tmp_file=.tmpT.c
+
+GenUsacoSource() {
+	if [ ! -z "$1" ]; then
+		file_name=$1
+		prog=`echo $file_name | sed "s/\..*$//"`	
+		local suffix=`echo $file_name | sed "s/^.*\.//"`
+		cat $template_dir/UsacoT.$suffix | sed -e "s/PROG:.*/PROG: $prog/" \
+							         -e "s/<input>/$prog.in/"	 \
+							         -e  "s/<output>/$prog.out/" \
+		> $template_dir/$tmp_file 
+	else
+		cp -f $template_dir/UsacoT.$suffix $template_dir/$tmp_file 
+	fi
+}
+
+NameConvention() {
+	echo $1 | sed -e 's/String/string/g' \
+			  -e 's/int\[]/vector<int>/g' \
+			  -e 's/double\[]/vector<double>/g' \
+			  -e 's/string\[]/vector<string>/g'
+			  # -e 's/long/long long/g'
+}
+
+DoTCStuff() {
+	local sourcefile=$1
+	local prog=`echo $sourcefile | awk -F '.' '{print $1}'`	
+	if [ -e in0 ]; then
+		#class_name=`awk '/Class:/{print $2}' in0`
+		#method_name=`awk '/Method:/{print $2}' in0`
+		#method_sig=`awk -F':' '/Method signature:/{print $2}' in0 | sed 's/^[ \t]*//'`
+		class_name=`TcReadClassName < in0`
+		method_name=`TcReadMethodName < in0`
+		method_sig=`TcReadMethodSig < in0`
+		method_sig=`NameConvention "$method_sig"`
+	else
+		class_name="Class"
+		method_name="Method"
+		method_sig="Method(void)"
+	fi
+	cat $template_dir/tcT.cpp | sed -e "s/<Class>/$class_name/" \
+						  -e "s/<Method Signature>/$method_sig/" \
+	> $sourcefile
+	cat $template_dir/tctester.cpp | sed -e "s/<Class>/$class_name/" \
+						  -e "s/<Method Signature>/$method_sig/" \
+	> tctester.cpp
+	cat $template_dir/tcMakefile | sed -e "s/<source>/$prog/g" \
+	> .Makefile
+	cp $template_dir/tctester.sh tester
+	cp $template_dir/tcparser.cpp parser.cpp
+	cp $template_dir/tcparser parser
+	cp $template_dir/tcegparser.cpp egparser.cpp
+	cp $template_dir/tcegparser egparser
+	cp $template_dir/tcutil.cpp util.cpp
+	echo "$class_name $method_name" > .tc
+}
+
+if ! [ "$#" -eq 1 -o "$#" -eq 2 ]
+then
+	echo "Usage : $0 <type> [new_file_name]"
+	exit 1
+fi
+
+suffix=".c"
+case "$1" in
+	f)	source_name=File	
+		;;
+	std)	source_name=Std
+		;;
+	lo)	source_name=ToLower
+		;;
+	ran)	source_name=Random
+		;;
+	rep)	source_name=ReP
+		;;
+	cur)	source_name=Cur
+		;;
+	chk)	source_name=Check
+		;;
+	pri)	source_name=Prime
+		;;
+	gra)	source_name=Graph
+		;;
+	wch)	source_name=wchar
+		;;
+	for)  source_name=Format
+		;;
+	bit) source_name=Bit
+		;;
+	gcd) source_name=Gcd
+		;;
+	bins) source_name=BinS
+		;;
+	sh)  source_name=Sh
+	     suffix=""
+		;;
+	perm) source_name=Perm
+		;;
+	pqi) source_name=PQ_int
+		;;
+	pq)  source_name=PQ
+		;;
+	hash) source_name=Hash
+		;;
+	s)   source_name=S
+		;;
+	q)   source_name=Q
+		;;
+	gtk) source_name=Gtk
+		;;
+	usaco) # Special support for usaco
+		GenUsacoSource $2
+		source_name=.tmp
+		;;
+	html)
+		source_name=Html
+		suffix=".htm"
+		;;
+	cpp)
+		# Later should be enhaunced to support auto switching
+		source_name="Cpp"
+		suffix=".cpp"
+		;;
+	max)  source_name=Max
+		;;
+	min)  source_name=Min
+		;;
+	vga)  source_name=Vga
+		;;
+	oxy)	source_name=Oxy
+		;;
+	debug)
+		source_name=Debug
+		;;
+	cp)
+		# Later should be enhaunced to support auto switching
+		# Half cpp
+		source_name="Cp"
+		suffix=".cpp"
+		;;
+	dbl)
+		# Later should be enhaunced to support auto switching
+		# DblCmp
+		source_name="Dbl"
+		suffix=".cpp"
+		;;
+	tc)
+		source_name="tc"
+		suffix=".cpp"
+		#DoTCStuff $2
+		mktc $2
+		exit
+		;;
+	j) 	source_name="java"
+		suffix=".java"
+		;;
+	*)	echo "Not Supported Type"
+		exit 1
+		;;
+esac
+
+if [ "$#" -eq 2 ]; then
+	cp $template_dir/"$source_name"T$suffix $2
+else
+	cat $template_dir/"$source_name"T$suffix
+fi
+
+
+
+
+
+
+
+
+
+
+

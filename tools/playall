@@ -1,0 +1,74 @@
+#! /bin/sh
+# Play All Video/Audio Files Under WD
+# Presently Only Skip Dirs
+# Usage : playall [options] [options-for-mplayer]
+# Options :
+#	-noout : No output from mplayer
+#	-nocon : No console keys for mplayer 
+#	-dir <file_dir> : Play files under file_dir rather than WD
+#	-perloop n : Specify loop time for each file 
+#	-shuf	: shuffle play
+
+# Get options for playall
+n_loop=1
+is_shuf=0
+is_option_over=0
+while [ "$#" -gt 0 ]
+do
+	case $1 in
+		-noout)	exec > /dev/null 2> /dev/null
+			;;	
+		-nocon)	exec < /dev/null	
+			;;
+		-dir)		dir=$2
+				shift
+			;;
+		-perloop)	n_loop=$2 # Loop for each song 
+				shift
+			;;
+		-shuf)	is_shuf=1
+			;;
+		*)
+			is_option_over=1
+			;;
+	esac
+	if [ $is_option_over = 1 ]; then
+		break;
+	fi
+	shift
+done
+
+# Get options for mplayer
+while [ "$#" -gt 0 ]
+do
+	options=$options" "$1
+	shift
+done
+
+if [ -z $dir ]; then
+	dir=`pwd`
+fi
+pl_file=pl_playall
+pl_file=/tmp/$pl_file
+rm -f $pl_file
+touch $pl_file
+cd $dir
+for file in *.*
+do
+	if [ -f $file ]; then
+		echo $dir/$file >> $pl_file
+	fi
+done
+if [ $is_shuf = 1 ]; then
+	shuf $pl_file
+fi
+dupline $pl_file $n_loop
+trap '' SIGTSTP
+mplayer -playlist $pl_file $options
+if [ "$?" != 0 ]; then
+	ret_stat=1
+else
+	ret_stat=0
+fi
+rm -f $pl_file
+exit $ret_stat

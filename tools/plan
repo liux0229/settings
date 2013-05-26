@@ -1,0 +1,7 @@
+#! /bin/sh
+
+tmp=$HOME/tmp/output
+finger root > $tmp
+line=`grep -n "^Plan:" $tmp | cut -d":" -f1`
+total=`wc -l $tmp | cut -d" " -f1`
+tail -`expr $total - $line` $tmp 

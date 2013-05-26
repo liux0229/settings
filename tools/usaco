@@ -1,0 +1,11 @@
+#! /bin/sh
+Usage="$0 [-p]"
+# Options:
+#	-p: display passwd for usaco
+
+src=$HOME/usaco/account
+if [ "$1" == -p ]; then
+	cat $src | grep pass | sed "s/^.*: //"
+else
+	elinks `cat $src | grep http`
+fi

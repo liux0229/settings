@@ -1,0 +1,37 @@
+#! /bin/sh
+Usage="$0 [start entry]"
+
+entry=1
+if [ $# = 1 ]; then
+	entry = $1
+fi
+
+device=eth0
+wait_sec=30
+mac_file=$HL/mac
+valid_mac_file=valid_mac
+
+if [ -f $valid_mac_file ]; then
+	rm $valid_mac_file
+fi
+
+exec 2> /dev/null
+n_entry=`wc $mac_file -l | sed -e "s/[^0-9]//g"`
+while [ $entry -le $n_entry ]; do
+	echo -n "Trying entry $entry ... "
+	setmac $entry
+	# Start probing
+	wait_kill $wait_sec ifup &
+	ifup $device > .if_output 
+	# Kill wait_kill if ifup is self-terminated
+	kill_proc wait_kill > /dev/null
+	# Have found ?
+	if cat .if_output | grep -q "done."; then
+		echo "Valid"	
+		getline $mac_file $entry >> valid_mac
+	else
+		echo "Invalid"
+	fi
+	entry=`expr $entry + 1`
+done
+rm -f .if_output

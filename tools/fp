@@ -1,0 +1,10 @@
+#! /bin/sh
+
+file=$1
+prefix=`echo $file | awk -F'.' '{print $1}'`
+dir=`pwd`
+cp $file ~
+cd
+fpc -gl -gd $file
+rm -f $file $prefix.o
+mv $prefix $dir

@@ -1,0 +1,19 @@
+#! /bin/sh
+# Usage : getline <file> <line_no>
+# Get a specific line, counted from 1
+# If line_no is out of range, nothing is outputed
+
+if [ "$#" != 2 ]; then
+	echo "Usage : getline <file> <line_no>"
+	exit 1
+fi
+no=1
+cat $1 |
+while read line 
+do
+	if [ $no = $2 ]; then
+		echo $line
+		break
+	fi
+	no=`expr $no + 1`
+done

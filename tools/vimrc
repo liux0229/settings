@@ -1,0 +1,7 @@
+syn on
+set tabstop=2 softtabstop=2 shiftwidth=2
+if has("mouse")
+	set mouse=a
+endif
+map <C-e>  :! ./%:r 
+map <C-b> :w<CR>:!genm.sh %<CR>:make -f .makefile %:r<CR>

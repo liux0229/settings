@@ -1,0 +1,3 @@
+#! /bin/sh
+
+who am i | tr " " "\n" | grep tty

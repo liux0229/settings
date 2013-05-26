@@ -1,0 +1,34 @@
+#! /bin/sh
+# Usage : uplogin [-ip]
+# Options : 
+#	ip : Only update ip
+# Update /home/liux/.login.htm
+
+login_file="/home/liux/.login.htm"
+disconnect_file="/home/liux/.disconnect.htm"
+ip=`getip`
+chfld $login_file ip $ip 
+chfld $disconnect_file ip $ip 
+if [ "$1" = "-ip" ]; then
+	exit 0
+fi
+while true 
+do
+	echo -n "Enter new account: "
+	read account
+	echo -n "Enter passwd: "
+	read passwd
+	echo "Please verify your input: "
+	echo "account : $account"
+	echo "passwd  : $passwd"
+	echo -n "Update(y/n/q)? "
+	read confirm
+	if [ $confirm = y -o $confirm = Y ]; then
+		chfld $login_file id $account
+		chfld $login_file password $passwd
+		echo "Updated"
+		break;
+	elif [ $confirm = q -o $confirm = Q ]; then
+		break;
+	fi
+done

@@ -1,0 +1,19 @@
+#! /bin/sh
+# Usage : usevim [new|old]
+# If no options is given, print version of currently-using vim
+
+if [ "$#" = 0 ]; then
+	vim --version | head -1 | sed "s/ (.*//"
+	exit 0
+fi
+case "$1" in
+	new)	path=/usr/local
+	;;
+	old)	path=/usr
+	;;
+	*)	echo "UnKnown Version"
+		exit 1
+	;;
+esac
+rm -f $HLT/vim
+ln -s $path/bin/vim $HLT/vim

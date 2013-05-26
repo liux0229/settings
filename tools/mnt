@@ -1,0 +1,58 @@
+#! /bin/bash
+Usage="mnt < type | machine/dir | machine/ >"
+# Mount Windws Partition
+# Mount smb share : An interface to smb
+
+if [ "$#" != 1 ]; then
+	echo "Usage : $Usage"
+	exit 1
+fi
+
+if echo $1 | grep -q "/" ; then
+	machine=`echo $1 | cut -d'/' -f1`	
+	dir=`echo $1 | cut -d'/' -f2`	
+	smb $machine $dir
+	exit 0
+fi
+
+dev="/dev/hda"
+dest=$1
+mnt_t="-t vfat"
+case "$1" in 
+	boot)		src_n=1
+		;;
+	win98)	src_n=5
+		;;
+	software)	src_n=6
+		;;
+	soft)		src_n=6
+			dest=software
+		;;
+	game)		src_n=7
+		;;
+	media)	src_n=8
+		;;
+	doc)		src_n=9
+		;;
+	misc)		src_n=10
+		;;
+	winxp)	src_n=11
+			mnt_t="-t ntfs"
+		;;
+	usb)		mnt_t=""
+			dev=""
+			src_n=""
+			dest=usb
+		;;
+	cd)		mnt_t=""	
+			dev=""
+			src_n=""
+			dest=cdrom
+		;;
+	cd1)		mnt_t=""	
+			dev=""
+			src_n=""
+			dest=cdrom1
+		;;
+esac
+mount $mnt_t $dev$src_n /mnt/$dest

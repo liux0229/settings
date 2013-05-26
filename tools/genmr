@@ -1,0 +1,23 @@
+#! /bin/sh
+# Gen Robot Makefile
+
+if [ "$#" -eq 0 ]; then
+	echo Usage : "$0 <c file(No Ext)> [makefile]"
+	exit 1
+fi
+if [ "$#" -eq 2 ]; then
+	makefile=$2
+else
+	makefile=makefile
+fi
+if [ -e $makefile ]; then
+	echo -e "'$makefile' already exists, overwrite?(y/n) \c"
+	read line
+	if ! [ $line = "y" -o $line = "Y" ]; then
+		echo "Not Writen to '$makefile'"
+		exit 1
+	fi
+fi
+echo "$1.robot : $1.c" > "$makefile"
+echo -e "\tgcc -I/usr/local/include/RealTimeBattle \
+-o /home/liux/rtb/robot/$1.robot $1.c" >> "$makefile"

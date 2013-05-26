@@ -1,0 +1,22 @@
+#! /bin/sh
+Usage="$0 [-s]"
+# Options:
+#	-s	Show windows fonts state(On/Off)
+
+fonts_dir=/usr/share/fonts
+if [ -d $fonts_dir/windows ]; then
+	state=On
+else
+	state=Off
+fi
+
+if [ "$1" = "-s" ]; then
+	echo $state
+	exit 0
+fi
+
+if [ $state = On ]; then
+	mv $fonts_dir/windows $HOME
+else
+	mv $HOME/windows $fonts_dir
+fi

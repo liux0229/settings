@@ -1,0 +1,34 @@
+#! /bin/sh
+# Get From Cab
+# Find a specific file in all cabs under win98 install dir
+# Then extract it into wd
+# Usage : $0 <file> 
+# Run this script under X
+
+if [ "$#" != 1 ]; then
+	echo "Usage : $0 <file>"
+fi
+
+dest_dir=`pwd`
+if [ -z "`ls /mnt/misc | head -1`" ]; then
+	mnt misc
+fi
+cd /mnt/misc/win98
+is_found=0
+for cab in *.cab 
+do
+	wine ./extract.exe $cab > /tmp/extract_output 2> /dev/null
+	if grep -q "$1" /tmp/extract_output ; then
+		if [ ! -d tmp ]; then
+			mkdir tmp
+		fi
+		wine ./extract.exe /Y /L tmp $cab $1 > /dev/null 2>&1
+		cp /mnt/misc/win98/tmp/$1 $dest_dir 
+		is_found=1	
+		break
+	fi
+done
+if [ $is_found = 0 ]; then
+	echo "Not Found"
+fi
+rm -f /tmp/extract_output

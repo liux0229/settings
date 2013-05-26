@@ -1,0 +1,4 @@
+#! /bin/sh
+if [ ! -z "$1" ]; then
+	ps -C $1 | grep $1 | while read line; do kill -9 `echo $line | sed "s/ .*$//"`; done
+fi

@@ -1,0 +1,60 @@
+#! /bin/sh
+# Usage : $0 [options] <c/c++ file(No Ext)> [makefile]
+# Options :
+#	-f non-interactive
+#	-l<lib> link lib
+#	-cpp Makefile for c++ source
+
+if [ "$#" -eq 0 ]; then
+	echo Usage : "$0 [options] <c file(No Ext)> [makefile]"
+	exit 1
+fi
+
+compiler=gcc
+suffix=".c"
+# Get options
+while true 
+do
+	is_options_over=0
+	case $1 in
+		-f)	is_force=1
+			;;
+		-l*)  if [ `echo -n $1 | wc -c` = 2 ]; then
+				echo "No Lib Speced After -l"
+				exit 1
+			fi
+			link_opt=$link_opt" "$1
+			;;
+		-cpp*) compiler=g++
+			 suffix=".cpp"
+			;;
+		*)	is_options_over=1		
+	esac
+	if [ $is_options_over = 1 ]; then
+		break;
+	fi
+	shift
+done
+if [ "$#" -eq 2 ]; then
+	makefile=$2
+else
+	makefile=makefile
+fi
+if [ -e "$makefile" -a ! "$is_force" = 1 ]; then
+	echo -e "'$makefile' already exists, overwrite?(y/n) \c"
+	read line
+	if ! [ $line = "y" -o $line = "Y" ]; then
+		echo "Not Writen to '$makefile'"
+		exit 1
+	fi
+fi
+cat << End > $makefile
+$1 : $1$suffix
+	$compiler -o $1 $1$suffix$link_opt
+
+debug : $1.c
+	$compiler -g -o debug $1$suffix$link_opt
+
+prof : $1.c
+	$compiler -g -pg -o debug $1$suffix$link_opt
+End

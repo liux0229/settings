@@ -1,0 +1,13 @@
+#! /bin/sh
+Usage="$0 <proc_name>"
+
+if [ $# != 1 ]; then
+	echo $Usage
+	exit 1
+fi
+
+proc_name=$1
+pid=`ps -A | grep $proc_name | sed -e "s/\([0-9]\+\).*/\1/" -e "s/[^0-9]//g"`
+if [ ! -z "$pid" ]; then
+	kill -9 $pid
+fi

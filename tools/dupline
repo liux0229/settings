@@ -1,0 +1,20 @@
+#! /bin/sh
+#Usage : dupline <filename> <times>
+
+cp $1 "$1"__bak
+rm -f $1
+touch $1
+cat "$1"__bak |
+while read line 
+do
+	n_time=$2
+	if [ -z $n_time ]; then
+		n_time=1
+	fi
+	while [ "$n_time" -gt 0 ]
+	do
+		echo $line >> $1
+		n_time=`expr $n_time - 1`
+	done
+done
+rm -f "$1"__bak

@@ -1,0 +1,12 @@
+#! /bin/sh
+
+# Split dic words up into a-z set
+# Dic file name wild card supported
+
+for file in $*
+do
+	for letter in [a-z]
+	do
+		grep ^$letter $file >> $letter
+	done
+done

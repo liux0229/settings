@@ -1,0 +1,12 @@
+#! /bin/sh
+Usage="ansi src.c"
+
+if [ "$#" != 1 ]; then
+	echo "$Usage"
+	exit 1
+fi
+
+src=$1
+output=`echo $src | sed "s/\.c$//"`
+
+gcc $src -o $output -ansi -fno-asm -Wall -lm --static -DONLINE_JUDGE

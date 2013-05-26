@@ -1,0 +1,211 @@
+#! /bin/sh
+# Lock computer
+# Usage : lock [options]
+# By default, use the passwd stored in /home/liux/tools/etc/syspass
+# Options :
+# 	-pass		Ask for passwd instead of looking into ./etc/syspass
+#	-updatepass	Similar to -pass, except then using it to update the one
+#			in ./etc/syspass
+
+audio_dir=/mnt/media/bio_audio
+
+PlayWarning()
+{
+	clear
+	if [ "$is_start_play" != 1 ]; then
+		cat <<- END
+			You have triggered the inner function
+			Put the microphone on and you will hear
+			a question about Liux
+			Answer it right and you will get logged in
+
+			When you are ready, hit ENTER
+		END
+		read line
+		clear
+		cat <<- END
+			What is your name ?
+			Use pinyin, only Liux's classmates
+			are allowed
+		END
+		name=""
+		while [ -z $name ]
+		do
+		echo -n "Name: "
+		read name
+		done
+		echo $name >> /home/liux/tools/etc/name_list
+		clear
+		cat <<- END
+			Your name has been recorded
+			One IMPORTANT Note:
+			Don't turn off the computer by
+			pushing the POWER or RESET
+			button
+			You may hit the hard drive
+			And there's a startup passwd
+			So don't try this way to get
+			access to the computer
+			Ready for the next question?
+			Hit ENTER!
+		END
+		read line
+	fi
+	cat <<- END
+		WARNING!!! WARNING!!! WARNING!!!
+		WARNING!!! WARNING!!! WARNING!!!
+		WARNING!!! WARNING!!! WARNING!!!
+
+		The system has been invaded, to ensure
+		the invaders do not get any secret info
+		The PC will explode itself in 5 minutes!!!
+
+		RED ALERT ON
+	END
+	is_start_play=1
+	mplayer -loop 2 $audio_dir/gallery/warning.sap > /dev/null \
+	2>&1 < /dev/null
+}
+
+PlayBio()
+{
+	clear
+	if [ "$is_start_play" != 1 ]; then
+		cat <<- END
+			Well, seems you are NOT Liux
+			If you are a friend of him, please
+			put the microphone on
+			I will ask a few questions about him
+			to ensure you are the right person to
+			log on
+
+			If you have put the mic on, hit ENTER
+		END
+		read line
+		clear
+		cat <<- END
+			What is your name ?
+			Use pinyin, only Liux's classmates
+			are allowed
+		END
+		name=""
+		while [ -z $name ]
+		do
+		echo -n "Name: "
+		read name
+		done
+		echo $name >> /home/liux/tools/etc/name_list
+		clear
+		cat <<- END
+			Your name has been recorded
+			One IMPORTANT Note:
+			Don't turn off the computer by
+			pushing the POWER or RESET
+			button
+			You may hit the hard drive
+			And there's a startup passwd
+			So don't try this way to get
+			access to the computer
+			Ready for the next question?
+			Hit ENTER!
+		END
+		read line
+	fi
+	clear
+	cat <<- END
+		SCARED ? WHY NOT LEAVE NOW	
+		OK, If you think you are brave
+		enough, wait the music to over
+		and I will show you the question
+	END
+	is_start_play=1
+	mplayer $audio_dir/gallery/last_fight.sap > /dev/null 2>&1 \
+	< /dev/null
+	PlayAllBio
+}
+
+PlayAllBio()
+{
+	clear
+	cat <<- END
+		Enjoy the music MAN !!!
+		You are TRAPPED !!!
+		Never touch others' computer unless
+		you are allowed
+	END
+	playall -dir $audio_dir/gallery -noout -nocon -perloop 2 -shuf
+}
+
+passfile=/home/liux/tools/etc/syspass
+is_ask_pass=0
+case $1 in
+	-pass)	is_ask_pass=1
+		;;
+	-updatepass) is_ask_pass=1
+			 is_update_pass=1
+		;;
+	"")
+		;;
+	*)		echo "Unknown Option : $1"
+			exit 1
+		;;
+esac
+if [ "$is_ask_pass" = 0 -a ! -f $passfile ]; then
+	echo "Passwd File Not Found"
+	is_ask_pass=1
+fi
+
+if [ $is_ask_pass = 1 ]; then
+	while true
+	do
+	echo -n "Enter passwd: "
+	read passwd 
+	echo -n "Confirm:      " 
+	read confirm
+	if [ $passwd = $confirm ]; then
+		break;
+	fi
+	echo "Do Not Match"
+	done
+else
+	passwd=`cat $passfile`
+fi
+if [ "$is_update_pass" = 1 ]; then
+	echo $passwd > $passfile 
+	echo "Passwd File Updated"
+fi
+
+trap 'PlayWarning' SIGHUP SIGINT SIGTERM
+trap '' SIGTSTP
+clear
+n_try=0
+while true 
+do
+	echo -n "Enter passwd to return: "
+	read in_passwd
+	if [ "$in_passwd" = "$passwd" ]; then
+		break;
+	fi
+	n_try=`expr $n_try + 1`
+	if [ "$n_try" -ge 3 ]; then
+		PlayBio
+	else
+		# Delay
+		i=0	
+		while [ "$i" -lt 1000 ]
+		do
+			i=`expr $i + 1`
+		done
+	fi
+done
+clear
+
+
+
+
+
+
+
+
+
+

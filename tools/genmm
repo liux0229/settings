@@ -1,0 +1,174 @@
+#! /bin/sh
+# Generate makefile for multiple files
+Usage="genmm [-a|U] [-f] [-m <makefile>] [output] [src1(with .c/.cpp) [src2...]]"
+# Options :
+# -a :
+# 	If -a is NOT specified, genmm uses all sources to generate makefile
+# 	Else it adds sources to existing makefile
+# -U :
+#	Update source's dependence list
+#	genmm decides source's header dependence by looking up `#include "*.h"'
+#	in the source itself, so this option is useful when the source's
+#	`#include' lines are changed after adding it to makefile
+#	No src files are needed when this option is specified
+# Notice :
+# 	if neither -a nor -U is specified, output is required 
+# -f : force overwriting existing makefile
+# -m : Specify makefile name
+
+# Write output exec to $output
+# Get src files from $makefile's first line, put them into src_list
+
+GetSrcs() {
+	# Fixme: need to add .cpp suffix
+	output=`head -1 $makefile | sed 's/:.*//'`
+	src_list=`head -1 $makefile | sed -e 's/^.*: *//' -e 's/.o\>/.c/g'`
+}
+
+if [ "$#" -lt 1 ]; then
+	echo "$Usage"
+	exit 1
+fi
+
+# Get options
+makefile=makefile
+while true 
+do
+	is_options_over=0
+	case $1 in
+		-a)	is_add=1
+			;;
+		-U)	is_update=1
+			;;
+		-f)	is_force=1
+			;;
+		-m)	makefile=$2
+			shift			
+			;;
+		*)	is_options_over=1		
+	esac
+	if [ $is_options_over = 1 ]; then
+		break;
+	fi
+	shift
+done
+
+if [ "$is_update" = 1 ]; then
+	if ! [ -e "$makefile" ]; then
+		echo "Can't update : '$makefile' does NOT exist"
+		exit 1	
+	fi
+	GetSrcs
+	$0 -f -m $makefile $output $src_list
+elif [ "$is_add" = 1 ]; then
+	if ! [ -e "$makefile" ]; then
+		echo "Can't update : '$makefile' does NOT exist"
+		exit 1	
+	fi
+	GetSrcs
+	# Get added src files
+	n_src=0
+	while [ "$#" -gt 0 ]
+	do
+		srcs[$n_src]=$1
+		n_src=`expr $n_src + 1`
+		shift
+	done
+	$0 -f -m $makefile $output $src_list ${srcs[*]}
+else
+	# Normal Mode
+	if echo "$1" | grep -q "\.c$\|\.cpp$"; then
+		echo "output name is required"
+		exit 1
+	fi
+	output=$1
+	shift
+	if [ -e "$makefile" -a ! "$is_force" = 1 ]; then
+		echo -e "'$makefile' already exists, overwrite?(y/n) \c"
+		read line
+		if ! [ $line = "y" -o $line = "Y" ]; then
+			echo "Not Writen to '$makefile'"
+			exit 1
+		fi
+	fi
+	rm -f $makefile
+	# Get src files
+	if echo "$1" | grep -q "\.cpp$"; then
+		CC=g++
+	else
+		CC=gcc
+	fi
+	n_src=0
+	while [ "$#" -gt 0 ]
+	do
+		srcs[$n_src]=$1
+		objs[$n_src]=`echo $1 | sed "s/\.c$\|\.cpp$/.o/"`
+		n_src=`expr $n_src + 1`
+		shift
+	done
+	# Guess Libs
+	lib_headers=(math.h ncurses.h)
+	libs=(m ncurses)
+	n_lib=2
+	i=0
+	link_opt=""
+	while [ "$i" -lt $n_src ]
+	do
+		if ! [ -e ${srcs[$i]} ]; then
+			i=`expr $i + 1`
+			continue	
+		fi
+		headers=`grep '#include.*<' ${srcs[$i]} | \
+			   sed -e 's/#include[^<]*//' -e 's/<//g' -e 's/>//g'`
+		headers=`echo $headers` # Convert newline to blank
+		j=0
+		while [ $j -lt $n_lib ]
+		do
+			if echo $headers | grep -q "${lib_headers[$j]}" ; then
+				link="-l"${libs[$j]}
+				if ! echo $link_opt | grep -q "\<"$link"\>" ; then
+					link_opt=$link_opt""$link" "
+				fi
+			fi
+			j=`expr $j + 1`
+		done
+		i=`expr $i + 1`
+	done
+	echo $output : ${objs[*]} >> $makefile
+	echo -e "\t$CC -o $output ${objs[*]}" >> $makefile $link_opt
+	# Make objects
+	i=0
+	debug_src=""
+	while [ "$i" -lt $n_src ]
+	do
+		if [ -e "${srcs[$i]}" ]; then
+			headers=`grep '#include.*"' ${srcs[$i]} | \
+				   sed -e 's/#include[^"]*//' -e 's/"//g'`
+			headers=`echo $headers` # Convert newline to blank
+		else
+			headers=""
+		fi
+		echo ${objs[$i]} : ${srcs[$i]} $headers >> $makefile
+		debug_src=$debug_src""${srcs[$i]}" "$headers" "
+		i=`expr $i + 1`
+	done
+	# Gen debug
+	echo "" >> $makefile
+	echo debug : $debug_src	>> $makefile
+	echo -e "\t$CC -g -o debug ${srcs[*]} $link_opt" >> $makefile
+	# Gen prof
+	echo "" >> $makefile
+	echo prof : $debug_src >> $makefile
+	echo -e "\t$CC -g -pg -o prof ${srcs[*]} $link_opt" >> $makefile
+	# Gen clean
+	echo "" >> $makefile
+	echo clean : >> $makefile
+	echo -e "\trm -f *.o" >> $makefile
+fi
+
+
+
+
+
+
+
