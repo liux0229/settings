@@ -2,7 +2,9 @@ source $ADMIN_SCRIPTS/master.vimrc
 source /home/engshare/admin/scripts/vim/biggrep.vim
 syn on
 
-set tabstop=2 softtabstop=2 shiftwidth=2 number ic nowrap
+set tabstop=2 softtabstop=2 shiftwidth=2 number ic nowrap expandtab
+" set retab // This applies expandtab to the existing file
+
 autocmd FileType * set formatoptions-=c formatoptions-=r formatoptions-=o
 if has("mouse")
   set mouse=a
